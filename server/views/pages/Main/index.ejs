@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<%- include('../../partials/head')-%>
+		<%- include('../../partials/styles')-%>
+	</head>
+	
+	<body>
+		<div>
+			<div class="container" style="padding:50px; margin:0 auto; background-color: rgb(215, 233, 248); width: 600px; border-radius: 20px;">
+				<form action="/account/login" method="post" class="form-horizontal">
+					<h2 style="padding-bottom: 20px;" class="text-danger">會員登入</h2>
+					<div class="form-group">
+						<label for="account" >會員帳號:</label>
+						<input type="account" id="account" name="email" placeholder="請輸入帳號" class="form-control" required="required" />
+						<span id="sp1"></span>
+					</div>
+						
+					<div class="form-group">
+						<label for="password">會員密碼:</label>
+						<input type="password" id="password" name="password" placeholder="請輸入密碼" class="form-control"  maxlength="15" required="required" />
+						<span id="sp2"></span>
+					</div>
+
+					<div class="form-group">
+						<button id="bt1" type="submit" class="btn btn-success"><i class="glyphicon glyphicon-send"></i> 登入</button>
+						<button type="reset" class="btn btn-primary"><i class="glyphicon glyphicon-repeat"></i> 重置</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+		<script>
+			
+			document.getElementById('bt1').addEventListener('click', function () {
+				var account = $('#account').val()
+				var password = $('#password').val()
+				var mname = {
+					account: account,
+					password: password 
+				}
+				// console.log(mname)
+				$.ajax({
+					type: 'get',
+					url: 'http://157.245.207.34:1337/api/login',
+					data: mname
+				}).done(function (result) {
+					localStorage.clear();  //清除所有資料
+					
+					if (result.length==0) {
+						$('#sp1').html('❌ 查無此帳號');
+						$('#sp1').css('color', 'red')
+					} else {
+						$('#sp1').html('✅ 輸入正確');
+						$('#sp1').css('color', 'green');
+						if (result[0]['member_pwd'] != password) {
+							$('#sp2').html('❌ 密碼錯誤,請重新輸入');
+							$('#sp2').css('color', 'red')
+						} else {
+							$('#sp2').html('✅ 輸入正確');
+							$('#sp2').css('color', 'green');
+							localStorage.setItem("loginSus", true); //強制等於true
+							localStorage.setItem("LoginName", result[0].member_name);
+							localStorage.setItem("LoginAcc", result[0].member_acc);
+							localStorage.setItem("LoginId", result[0].member_id);
+							localStorage.setItem("Loginssn",result[0].member_ssn);
+							// localStorage.setItem("aaaaa",JSON.stringify(result[0].member_acc))
+							//  console.log(JSON.parse(localStorage["aaaaa"]))
+							window.location.href = '/field';
+						}
+					}
+				}).fail(function (err) {
+					console.log(err.statusText);
+				})
+			})
+		</script>
+		<%- include('../../partials/scripts')-%>
+	</body>
+</html>

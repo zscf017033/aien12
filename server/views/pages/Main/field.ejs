@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<%- include('../../partials/head')-%>
+		<%- include('../../partials/styles')-%>
+		
+	</head>
+	<body>
+		<%- include('../../partials/navbar')-%>
+	
+	<div>
+		<div style="margin: 0 auto;padding-left: 900px;">
+			<label id="">Search：</label>
+			<select size='1' name='options[2]' id='select' >
+				<option value='0' selected='selected'>selected</option>
+				<option value=Date >Date</option>
+				<option value=Time >Time</option>
+				<option value=usec >usec</option>
+				<option value=SourceIP >SourceIP</option>
+				<option value=SourcePort >SourcePort</option>
+				<option value=DestinationIP >DestinationIP</option>
+				<option value=DestinationPort >DestinationPort</option>
+				<option value=FQDN >FQDN</option>
+			</select>
+		</div>
+		<div id="fields"></div>
+		<div id="selected" style="display: none;"></div>
+	</div>
+	<script>
+		$(document).ready(function(){
+			$.ajax({
+	        type: 'get',
+	        url:'http://157.245.207.34:1337/field/allfield'
+	    }).done(function (fieldAll) {
+	        /*alert(JSON.stringify(fieldAll));*/
+			var num= fieldAll.length/2826 ;
+			var str = "";
+			var pages = 26;
+			str += "<div style='text-align:center'>"
+			for (i=1;i<=num;i++){
+				if(i==pages){
+					str += "<br>";
+					pages += 25
+				}
+				str += "<button style='display:inline' onclick='page("+i+")'>"+i+"</button>"
+			}
+			str += "</div>"
+	       
+			str += "<div class='container'>"
+			var count = 1
+			var page = 1
+	        $.each(fieldAll, function (index, field) {
+				
+				if (count%2826==1){
+					if(page==1){
+						str += "<div id='page"+page+"' style='display:inline' class='ccc'>"
+					}
+					else{
+						str += "<div id='page"+page+"' style='display:none' class='ccc'>"
+					}
+					str += "<table style='width:1000px;margin:0 auto;text-align:center'"+"class='table table-striped table-hover' >";
+					str += "<thead>";
+					str += "<tr>";
+					str += "<td>SourceIP</td>";
+					str += "<td>Time</td>";
+					str += "<td>FQDN</td>";
+					str += "</tr>";
+					str += "</thead>";
+					str += "<body>";
+					count = 1
+				}
+				console.log(count)
+				str += "<tr>";
+				str += "<td style='color:blue;font-weight: bolder'><div style='margin-top:65px'>"+field.SourceIP+"</div>"+"</td>";
+				str += "<td><div style='margin-top:65px'>"+"<i class='text-danger'>"+field.Time+"</i>"+"</div></td>";
+				str += "<td><div style='margin-top:65px'>"+field.FQDN+"</div></td>";
+				str += "</tr>";
+				if (count==2826){
+					str += "</body>";
+					str += "</table>";
+					str += "</div>";
+					page++
+				}
+	            count ++
+	        })
+			str += "</div>";
+	        
+	        $("#fields").html(str);
+			
+	    }).fail(function (err) {
+	        alert(err.statusText);
+	    })
+		})
+		
+		function page(a){
+			$(".ccc").css('display','none');
+			$("#page"+a).css('display','block');
+		}
+
+		// seach keypoint
+		document.getElementById('select').addEventListener('change', function () {
+					$.ajax({
+						type: 'get',
+						url: 'http://157.245.207.34:1337/field/select/' + $('#select').val()
+
+					}).done(function(result){
+						var value = $('#select').val();
+						// alert(JSON.stringify(result));
+						var str = "";
+						str += "<div class='container'>"
+						str += "<table style='width:1000px;margin:0 auto;text-align:center'"+"class='table table-striped table-hover' >";
+						str += "<thead>";
+						str += "<tr>";
+						str += "<td>"+value+"</td>";
+						str += "</tr>";
+						str += "</thead>";
+						str += "<body>";
+						$.each(result, function (index, field) {
+							console.log(index);
+							str += "<tr>";
+							str += "<td style='color:blue;font-weight: bolder'><div style='margin-top:65px'>"+field[value]+"</div>"+"</td>";
+							str += "</tr>";
+							
+						})
+						str += "</body>";
+						str += "</table>";
+						str += "</div>";
+						$("#fields").hide();
+						$("#selected").show();
+						$("#selected").html(str);
+					}).fail(function(err){
+						console.log(err.statusText);
+					})
+				})
+			
+			
+	    
+	</script>
+
+		<%- include('../../partials/scripts')-%>
+	</body>
+</html>
+
